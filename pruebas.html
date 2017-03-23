@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Pruebas</title>
+</head>
+
+<body>
+
+	
+	<script src="p5.min.js"></script>
+
+	<script>
+		var path = [];
+		var circles = 5;
+		var ellipses = [];
+		var parent = null;
+
+		function setup() {
+			createCanvas(600, 600);
+			parent = new Circle(width / 2, height / 2, 180, 0.01);
+			create_fractal(parent);
+		}
+
+
+		function create_fractal(circle) {
+			console.log(circle.angle);
+			if (circles > 0) {
+				var r2 = circle.d * 0.5;
+				var rsum = circle.d / 2 + r2 / 14;
+				//var ang = Math.random() * (0.1 - 0.01) + 0.01;
+				var ang = 0.01;
+				if (circles == 4) {
+					ang = 0.07;
+				}
+				if (circles == 5){
+					ang = 0.07;
+				}
+				circle.add_child(new Circle(circle.x + rsum, circle.y + rsum, circle.d / 2, ang));
+				circle.show();
+				circles = circles - 1;
+				create_fractal(circle.get_child());
+			}
+
+		}
+
+		function draw() {
+			background(51);
+			var circle = parent;
+			ellipse(circle.x, circle.y, circle.d, circle.d);
+			while (circle != null) {
+				var r2 = circle.d * 0.5;
+				var rsum = circle.d / 2 + r2 / 2;
+				if (circle.has_next()) {
+					var child = circle.get_child();
+					child.x = circle.x + rsum * cos(child.speed);
+					child.y = circle.y + rsum * sin(child.speed);
+					if (!child.has_next()) {
+						path.push(createVector(child.x, child.y));
+					}
+					child.show();
+					//child.angle += child.angle;
+					child.speed += child.angle;
+				} else {
+					beginShape();
+					for (var pos of path) {
+						vertex(pos.x, pos.y);
+					}
+					endShape();
+
+				}
+				circle = circle.get_child();
+			}
+		}
+
+
+		class Circle {
+
+			constructor(x, y, d, angle) {
+				this.x = x;
+				this.y = y;
+				this.d = d;
+				this.children = null;
+				this.angle = angle;
+				this.speed = 0;
+			}
+
+			has_next() {
+				return (this.get_child() != null);
+			}
+			add_child(circle) {
+				this.children = circle;
+			}
+			get_child() {
+				return this.children;
+			}
+			show() {
+				stroke(255);
+				noFill();
+				ellipse(this.x, this.y, this.d, this.d);
+			}
+
+		}
+	</script>
+</body>
+
+</html>
